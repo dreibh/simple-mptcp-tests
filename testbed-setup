@@ -29,7 +29,7 @@ if [ $# -ne 1 ] ; then
    exit 1
 fi
 N=$1
-if [[ ! "$N" =~ ^[0-9]+$ ]] || [ $N -lt 1 ] || [ $N -gt 9 ] ; then
+if [[ ! "$N" =~ ^[0-9]+$ ]] || [ "$N" -lt 1 ] || [ "$N" -gt 9 ] ; then
    echo >&2 "ERROR: Invalid number of networks"
    exit 1
 fi
@@ -58,7 +58,7 @@ done
 
 # ====== Links and Addresses ================================================
 echo -e "\e[34mCreating and configuring links ...\e[0m"
-i=0; while [ $i -lt $N ] ; do
+i=0 ; while [ $i -lt "$N" ] ; do
    sudo ip link add client$i netns mptcp-client type veth peer server$i netns mptcp-server
    sudo ip -n mptcp-server address add "${prefixes[$i]}.1/24" dev server$i
    sudo ip -n mptcp-client address add "${prefixes[$i]}.2/24" dev client$i

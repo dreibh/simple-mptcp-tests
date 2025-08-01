@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 #
 # Simple MPTCP Test Scripts
 # Copyright (C) 2025 by Thomas Dreibholz
@@ -24,4 +25,21 @@ if ! which tshark >/dev/null ; then
    exit 1
 fi
 
-sudo ip netns exec mptcp-server tshark -i any -Y mptcp
+if [ $# -lt 1 ] ; then
+   echo >&2 "Usage: $0 server@client [T-Shark options ...]"
+   exit 1
+fi
+
+TYPE=$1
+if [[ ! "${TYPE}" =~ ^(server|client)$ ]] ; then
+   echo >&2 "ERROR: Invalid type ${TYPE}!"
+   exit 1
+fi
+shift
+
+OPTIONS=
+if [ $# -lt 1 ] ; then
+   OPTIONS="-Y mptcp"
+fi
+
+sudo ip netns exec "mptcp-${TYPE}" tshark -i any ${OPTIONS} $@

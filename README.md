@@ -10,8 +10,7 @@ This repository contains some simple test scripts for Linux MPTCP in the mainlin
 * [test-ncat-client](test-ncat-client): Run a simple connected test with ncat.
 * [test-monitor-server](test-monitor-server): Run "ip mptcp monitor" in the server namespace.
 * [test-monitor-client](test-monitor-client): Run "ip mptcp monitor" in the client namespace.
-* [test-server-tshark](test-server-tshark): Run T-Shark in the server namespace.
-* [test-client-tshark](test-client-tshark): Run T-Shark in the client namespace.
+* [test-tshark](test-tshark): Run T-Shark in the server or client namespace.
 
 ## Run a Test
 
@@ -35,9 +34,13 @@ This repository contains some simple test scripts for Linux MPTCP in the mainlin
    ./test-ncat-server
    ```
 
-5. Start client T-Shark in a separate shell:
+5. Start T-Shark in the client or server namespace in a separate shell, e.g.:
    ```
-   ./test-client-tshark
+   ./test-client-tshark client
+   ```
+   or to write a PCAP file:
+   ```
+   ./test-client-tshark server -w /tmp/server.pcap
    ```
 
 6. Run a client, e.g.:
