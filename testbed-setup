@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+#
+# Simple MPTCP Test Scripts
+# Copyright (C) 2025 by Thomas Dreibholz
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Contact: dreibh@simula.no
+
+set -eu
+
+declare -a prefixes
+prefixes=( 10.0.0   172.16.0   192.168.1
+           10.10.0  172.20.0   192.168.10
+           10.20.0  172.24.0   192.168.20 )
+if [ $# -ne 1 ] ; then
+   echo >&2 "Usage: $0 number_of_networks"
+   exit 1
+fi
+N=$1
+if [[ ! "$N" =~ ^[0-9]+$ ]] || [ $N -lt 1 ] || [ $N -gt 9 ] ; then
+   echo >&2 "ERROR: Invalid number of networks"
+   exit 1
+fi
+
+
+# ====== Namespaces =========================================================
+echo -e "\e[34mCreating and configuring namespaces ...\e[0m"
+for type in server client ; do
+   if [ -e /run/netns/mptcp-${type} ] ; then
+      sudo ip netns del mptcp-${type}
+   fi
+   sudo ip netns add mptcp-${type}
+done
+
+echo -en "\e[32m"
+sudo sysctl -w net.ipv4.conf.all.rp_filter=0
+sudo sysctl -w net.ipv4.tcp_ecn=1
+for type in server client ; do
+   echo -en "\e[32m"
+   sudo ip netns exec mptcp-${type} sysctl -w net.mptcp.enabled=1
+   echo -en "\e[0m"
+   sudo ip -n mptcp-${type} mptcp endpoint flush
+   sudo ip -n mptcp-${type} mptcp limits set subflow 8 add_addr_accepted 8
+done
+
+
+# ====== Links and Addresses ================================================
+echo -e "\e[34mCreating and configuring links ...\e[0m"
+i=0; while [ $i -lt $N ] ; do
+   sudo ip link add client$i netns mptcp-client type veth peer server$i netns mptcp-server
+   sudo ip -n mptcp-server address add "${prefixes[$i]}.1/24" dev server$i
+   sudo ip -n mptcp-client address add "${prefixes[$i]}.2/24" dev client$i
+   sudo ip -n mptcp-server link set server$i up
+   sudo ip -n mptcp-client link set client$i up
+   sudo ip -n mptcp-server mptcp endpoint add "${prefixes[$i]}.1" dev server$i id $((100+i)) subflow signal
+   sudo ip -n mptcp-client mptcp endpoint add "${prefixes[$i]}.2" dev client$i id $((200+i)) subflow signal
+   i=$((i+1))
+done
+for type in server client ; do
+   echo -e "\e[35m${type^} Configuration:\e[33m"
+   sudo ip -n mptcp-${type} -4 addr show
+   echo -en "\e[32m"
+   sudo ip -n mptcp-${type} mptcp endpoint show
+   sudo ip -n mptcp-${type} mptcp limits
+done
+echo -en "\e[0m"

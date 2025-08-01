@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+echo -e "\e[H\e[2JClient Monitor:\e[32m"
+sudo ip -n mptcp-client mptcp monitor
