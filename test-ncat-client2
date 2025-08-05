@@ -27,4 +27,4 @@ fi
 
 echo -e "\e[34mRunning ncat client 2 (on server!!!) ...\e[0m"
 sudo ip netns exec mptcp-server \
-   mptcpize run ncat -c 'while [ true ] ; do echo "This is a test!" ; sleep 1 ; done' 10.0.0.2 4321
+   mptcpize run ncat -c 'while [ true ] ; do echo "This is a test!" ; sleep 1 ; done' 10.0.0.2 5432
