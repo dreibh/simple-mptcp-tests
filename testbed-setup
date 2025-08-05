@@ -64,8 +64,8 @@ i=0 ; while [ $i -lt "$N" ] ; do
    sudo ip -n mptcp-client address add "${prefixes[$i]}.2/24" dev client$i
    sudo ip -n mptcp-server link set server$i up
    sudo ip -n mptcp-client link set client$i up
-   sudo ip -n mptcp-server mptcp endpoint add "${prefixes[$i]}.1" dev server$i id $((100+i)) subflow signal
-   sudo ip -n mptcp-client mptcp endpoint add "${prefixes[$i]}.2" dev client$i id $((200+i)) subflow signal
+   sudo ip -n mptcp-server mptcp endpoint add "${prefixes[$i]}.1" dev server$i id $((100+i)) signal
+   sudo ip -n mptcp-client mptcp endpoint add "${prefixes[$i]}.2" dev client$i id $((200+i)) subflow
    i=$((i+1))
 done
 for type in server client ; do
