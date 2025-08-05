@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+#
+# Simple MPTCP Test Scripts
+# Copyright (C) 2025 by Thomas Dreibholz
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Contact: dreibh@simula.no
+
+set -eu
+
+if ! which ncat >/dev/null ; then
+   echo >&2 "ERROR: ncat is not installed!"
+   exit 1
+fi
+
+echo -e "\e[34mRunning ncat server (on client!!!) ...\e[0m"
+sudo ip netns exec mptcp-client \
+   mptcpize run ncat -k -4 -i 30 -c "sleep 60" -C -o /tmp/server -l 0.0.0.0 4321
